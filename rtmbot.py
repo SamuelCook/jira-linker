@@ -4,7 +4,6 @@ import sys
 sys.dont_write_bytecode = True
 
 import glob
-import yaml
 import json
 import os
 import sys
@@ -76,9 +75,9 @@ class Plugin(object):
         self.module = __import__(name)
         self.register_jobs()
         self.outputs = []
-        if name in config:
+        if name in os.environ:
             logging.info("config found for: " + name)
-            self.module.config = config[name]
+            self.module.config = os.environ[name]
         if 'setup' in dir(self.module):
             self.module.setup()
     def register_jobs(self):
@@ -146,8 +145,8 @@ class UnknownChannel(Exception):
 
 
 def main_loop():
-    if "LOGFILE" in config:
-        logging.basicConfig(filename=config["LOGFILE"], level=logging.INFO, format='%(asctime)s %(message)s')
+    if "LOGFILE" in os.environ:
+        logging.basicConfig(filename=os.environ["LOGFILE"], level=logging.INFO, format='%(asctime)s %(message)s')
     logging.info(directory)
     try:
         bot.start()
@@ -163,15 +162,14 @@ if __name__ == "__main__":
                                 directory
                                 ))
 
-    config = yaml.load(file('rtmbot.conf', 'r'))
-    debug = config["DEBUG"]
-    bot = RtmBot(config["SLACK_TOKEN"])
+    debug = os.environ["DEBUG"]
+    bot = RtmBot(os.environ["SLACK_TOKEN"])
     site_plugins = []
     files_currently_downloading = []
     job_hash = {}
 
-    if config.has_key("DAEMON"):
-        if config["DAEMON"]:
+    if os.environ.has_key("DAEMON"):
+        if os.environ["DAEMON"]:
             import daemon
             with daemon.DaemonContext():
                 main_loop()
