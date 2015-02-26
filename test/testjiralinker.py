@@ -65,5 +65,16 @@ class TestJiraIdFinder(unittest.TestCase):
         self.assertIn(input_jira_id1, jiraids)
         self.assertIn(input_jira_id2, jiraids)
 
+    def test_results_come_out_in_the_right_order(self):
+        jirakey = "ABC"
+        input_jira_ids = ["ABC-1", "ABC-2", "ABC-3", "ABC-4", "ABC-5", "ABC-6", "ABC-7", "ABC-8", "ABC-9"]
+
+        message = " ".join(input_jira_ids)
+
+        parser = JiraIdFinder([jirakey], message)
+        actual_jira_ids = parser.find_jira_ids()
+
+        self.assertEquals(input_jira_ids, actual_jira_ids)
+
 if __name__ == '__main__':
     unittest.main()

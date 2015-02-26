@@ -22,16 +22,22 @@ def process_message(data):
         issue = client.lookup_jira_issue(id)
         if issue is not None:
             summary = issue.fields.summary
-            assignee =  issue.fields.assignee.displayName
+
+            if issue.fields.assignee is None:
+                assignee = "[Unassigned]"
+            else:
+                assignee = "[Assignee: " + issue.fields.assignee.displayName + "]"
+
             url = issue.permalink()
             status = issue.fields.status.name
 
-            response = id + ": " + summary + "." \
-                          + "  [Assignee: " + assignee + "]" \
-                          + "  [" + status + "]" \
-                          + "\n" + url
+            response = id + ": " + summary + ".  " \
+                       + assignee \
+                       + "  [" + status + "]\n" \
+                       + url
 
             outputs.append([channel, response])
+
 
 class JiraIdFinder(object):
     def __init__(self, jirakeys, message):
@@ -44,8 +50,7 @@ class JiraIdFinder(object):
             p = re.compile('(' + key + '\-\d+)')
             jiraids.extend(p.findall(self.message))
 
-        return frozenset(jiraids)
-
+        return remove_duplicates(jiraids)
 
 class JiraClient(object):
     def __init__(self, server_uri, username, password):
@@ -63,3 +68,8 @@ class JiraClient(object):
             return self.jira.issue(issueid)
         except JIRAError:
             pass
+
+def remove_duplicates(seq):
+    seen = set()
+    seen_add = seen.add
+    return [ x for x in seq if not (x in seen or seen_add(x))]
