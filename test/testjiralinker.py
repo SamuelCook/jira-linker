@@ -22,7 +22,7 @@ class TestJiraIdFinder(unittest.TestCase):
         parser = JiraIdFinder([jirakey], message)
         jiraids = parser.find_jira_ids()
 
-        self.assertIn(input_jira_id, jiraids)
+        self.assertEquals([input_jira_id], jiraids)
 
     def test_supports_multiple_jira_ids(self):
         jirakey = "ABC"
@@ -34,8 +34,7 @@ class TestJiraIdFinder(unittest.TestCase):
         parser = JiraIdFinder([jirakey], message)
         jiraids = parser.find_jira_ids()
 
-        self.assertIn(input_jira_id1, jiraids)
-        self.assertIn(input_jira_id2, jiraids)
+        self.assertEquals([input_jira_id1, input_jira_id2], jiraids)
 
     def test_includes_only_one_result_for_duplicate_jira_ids(self):
         jirakey = "ABC"
@@ -47,8 +46,7 @@ class TestJiraIdFinder(unittest.TestCase):
         parser = JiraIdFinder([jirakey], message)
         jiraids = parser.find_jira_ids()
 
-        self.assertIn(input_jira_id1, jiraids)
-        self.assertEquals(1, len(jiraids))
+        self.assertEquals([input_jira_id1], jiraids)
 
     def test_supports_multiple_jira_ids_with_different_keys(self):
         jirakey1 = "ABC"
@@ -62,8 +60,7 @@ class TestJiraIdFinder(unittest.TestCase):
         parser = JiraIdFinder([jirakey1, jirakey2], message)
         jiraids = parser.find_jira_ids()
 
-        self.assertIn(input_jira_id1, jiraids)
-        self.assertIn(input_jira_id2, jiraids)
+        self.assertEquals([input_jira_id1, input_jira_id2], jiraids)
 
     def test_results_come_out_in_the_right_order(self):
         jirakey = "ABC"
