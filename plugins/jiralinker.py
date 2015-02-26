@@ -1,18 +1,29 @@
 #!/usr/bin/env python
 
-from jira import JIRA
-from jira import JIRAError
 import re
 import os
-import sys
+import logging
+
+from jira import JIRA
+from jira import JIRAError
+
 
 outputs = []
 
-
 def process_message(data):
+    # Used to ignore the bot's own messages (and to avoid being stuck in a loop)
+    this_bot_user_id = os.environ['BOT_USER_ID']
+
+    if data['user'] == this_bot_user_id:
+        logging.debug("Ignoring own message.")
+        return
+
     jirakeys = os.environ['JIRA_KEYS'].split()
     channel = data['channel']
     message = data['text']
+
+    logging.debug("Received message on Channel [" + channel + "]: " + message)
+    logging.debug(data)
 
     idfinder = JiraIdFinder(jirakeys, message)
     client = JiraClient(os.environ['JIRA_SERVER_URI'], os.environ['JIRA_USERNAME'], os.environ['JIRA_PASSWORD'])

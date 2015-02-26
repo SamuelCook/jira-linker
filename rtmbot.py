@@ -147,7 +147,12 @@ class UnknownChannel(Exception):
 def main_loop():
     if "LOGFILE" in os.environ:
         logging.basicConfig(filename=os.environ["LOGFILE"], level=logging.INFO, format='%(asctime)s %(message)s')
-    logging.info(directory)
+
+    logging.getLogger().addHandler(logging.StreamHandler())
+
+    if debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+
     try:
         bot.start()
     except KeyboardInterrupt:
