@@ -10,6 +10,7 @@ from jira import JIRAError
 
 outputs = []
 
+
 def process_message(data):
     # Used to ignore the bot's own messages (and to avoid being stuck in a loop)
     this_bot_user_id = os.environ['BOT_USER_ID']
@@ -39,22 +40,9 @@ def process_message(data):
     ids = idfinder.find_jira_ids()
     for id in ids:
         issue = client.lookup_jira_issue(id)
+
         if issue is not None:
-            summary = issue.fields.summary
-
-            if issue.fields.assignee is None:
-                assignee = "[Unassigned]"
-            else:
-                assignee = "[Assignee: " + issue.fields.assignee.displayName + "]"
-
-            url = issue.permalink()
-            status = issue.fields.status.name
-
-            response = id + ": " + summary + ".  " \
-                       + assignee \
-                       + "  [" + status + "]\n" \
-                       + url
-
+            response = JiraIssueFormatter(issue).format()
             outputs.append([channel, response])
 
 
@@ -70,6 +58,7 @@ class JiraIdFinder(object):
             jiraids.extend(p.findall(self.message))
 
         return remove_duplicates(jiraids)
+
 
 class JiraClient(object):
     def __init__(self, server_uri, username, password):
@@ -88,7 +77,30 @@ class JiraClient(object):
         except JIRAError:
             pass
 
+
+class JiraIssueFormatter(object):
+    def __init__(self, issue):
+        self.issue = issue
+
+    def format(self):
+        summary = self.issue.fields.summary
+
+        if self.issue.fields.assignee is None:
+            assignee = "[Unassigned]"
+        else:
+            assignee = "[Assignee: " + self.issue.fields.assignee.displayName + "]"
+
+        url = self.issue.permalink()
+        status = self.issue.fields.status.name
+
+        response = self.issue.key + ": " + summary + ". " \
+                   + assignee \
+                   + " [" + status + "]\n" \
+                   + url
+        return response
+
+
 def remove_duplicates(seq):
     seen = set()
     seen_add = seen.add
-    return [ x for x in seq if not (x in seen or seen_add(x))]
+    return [x for x in seq if not (x in seen or seen_add(x))]

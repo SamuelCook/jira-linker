@@ -3,6 +3,7 @@
 import unittest
 
 from plugins.jiralinker import *
+from collections import namedtuple
 
 
 class TestJiraIdFinder(unittest.TestCase):
@@ -72,6 +73,64 @@ class TestJiraIdFinder(unittest.TestCase):
         actual_jira_ids = parser.find_jira_ids()
 
         self.assertEquals(input_jira_ids, actual_jira_ids)
+
+
+class TestJiraIssueFormatter(unittest.TestCase):
+    def create_sample_issue(self, key, statusname, summary, url, assigneename=None):
+        def issue_permalink():
+            return url
+
+        class Fields(namedtuple('Fields', 'summary status assignee')):
+            # noinspection PyInitNewSignature
+            def __new__(cls, summary, status, assignee=None):
+                return super(Fields, cls).__new__(cls, summary, status, assignee)
+
+        Issue = namedtuple('Issue', 'key fields permalink')
+        Assignee = namedtuple('Assignee', 'displayName')
+        Status = namedtuple('Status', 'name')
+
+        status = Status(name=statusname)
+
+        if assigneename is not None:
+            fields = Fields(summary=summary, status=status, assignee=Assignee(displayName=assigneename))
+        else:
+            fields = Fields(summary=summary, status=status)
+
+        issue = Issue(key=key, fields=fields, permalink=issue_permalink)
+
+        return issue
+
+    def test_jira_issue_formatting(self):
+        key = "JIRA-123"
+        summary = "My JIRA Summary"
+        assigneename = "Mr. Assignee"
+        url = "http://example.org/example"
+        statusname = "A Status"
+
+        issue = self.create_sample_issue(key, statusname, summary, url, assigneename)
+
+        expectedoutput = key + ": " + summary + ". [Assignee: " + assigneename + "] [" + statusname + "]\n" + url
+
+        formatter = JiraIssueFormatter(issue)
+        actualoutput = formatter.format()
+
+        self.assertEquals(expectedoutput, actualoutput)
+
+    def test_formatting_with_no_assignee(self):
+        key = "JIRA-123"
+        summary = "My JIRA Summary"
+        url = "http://example.org/example"
+        statusname = "A Status"
+
+        issue = self.create_sample_issue(key, statusname, summary, url)
+
+        expectedoutput = key + ": " + summary + ". [Unassigned] [" + statusname + "]\n" + url
+
+        formatter = JiraIssueFormatter(issue)
+        actualoutput = formatter.format()
+
+        self.assertEquals(expectedoutput, actualoutput)
+
 
 if __name__ == '__main__':
     unittest.main()
