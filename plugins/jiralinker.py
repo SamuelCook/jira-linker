@@ -14,16 +14,24 @@ def process_message(data):
     # Used to ignore the bot's own messages (and to avoid being stuck in a loop)
     this_bot_user_id = os.environ['BOT_USER_ID']
 
-    if data['user'] == this_bot_user_id:
+    logging.debug("Received data:")
+    logging.debug(data)
+
+    if 'user' in data and data['user'] == this_bot_user_id:
         logging.debug("Ignoring own message.")
+        return
+
+    if 'channel' not in data:
+        logging.info("Cannot process message: no channel present in received data.")
+        return
+
+    if 'text' not in data:
+        logging.info("Cannot process message: no text present in received data.")
         return
 
     jirakeys = os.environ['JIRA_KEYS'].split()
     channel = data['channel']
     message = data['text']
-
-    logging.debug("Received message on Channel [" + channel + "]: " + message)
-    logging.debug(data)
 
     idfinder = JiraIdFinder(jirakeys, message)
     client = JiraClient(os.environ['JIRA_SERVER_URI'], os.environ['JIRA_USERNAME'], os.environ['JIRA_PASSWORD'])
