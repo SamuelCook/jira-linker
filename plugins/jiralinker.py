@@ -7,27 +7,30 @@ import logging
 from jira import JIRA
 from jira import JIRAError
 
-
 outputs = []
-
+logger = logging.getLogger("jira-linker")
 
 def process_message(data):
+    debug = os.environ["DEBUG"]
+    if debug:
+        logger.setLevel(logging.DEBUG)
+
+    logger.debug("Received data:")
+    logger.debug(data)
+
     # Used to ignore the bot's own messages (and to avoid being stuck in a loop)
     this_bot_user_id = os.environ['BOT_USER_ID']
 
-    logging.debug("Received data:")
-    logging.debug(data)
-
     if 'user' in data and data['user'] == this_bot_user_id:
-        logging.debug("Ignoring own message.")
+        logger.debug("Ignoring own message.")
         return
 
     if 'channel' not in data:
-        logging.info("Cannot process message: no channel present in received data.")
+        logger.info("Cannot process message: no channel present in received data.")
         return
 
     if 'text' not in data:
-        logging.info("Cannot process message: no text present in received data.")
+        logger.info("Cannot process message: no text present in received data.")
         return
 
     jirakeys = os.environ['JIRA_KEYS'].split()

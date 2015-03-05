@@ -131,6 +131,15 @@ class TestJiraIssueFormatter(unittest.TestCase):
 
         self.assertEquals(expectedoutput, actualoutput)
 
+    def test_some_stuff(self):
+        os.environ['DEBUG'] = 'true'
+        os.environ['BOT_USER_ID'] = 'me'
+        os.environ['JIRA_KEYS'] = 'BKR'
+        os.environ['JIRA_SERVER_URI'] = 'http://localhost'
+        os.environ['JIRA_USERNAME'] = 'me@elasticpath.com'
+        os.environ['JIRA_PASSWORD'] = 'secr3t'
+        data = {}
+        process_message(data)
 
 if __name__ == '__main__':
     unittest.main()

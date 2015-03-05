@@ -150,9 +150,6 @@ def main_loop():
 
     logging.getLogger().addHandler(logging.StreamHandler())
 
-    if debug:
-        logging.getLogger().setLevel(logging.DEBUG)
-
     try:
         bot.start()
     except KeyboardInterrupt:
