@@ -10,6 +10,7 @@ from jira import JIRAError
 outputs = []
 logger = logging.getLogger("jira-linker")
 
+
 def process_message(data):
     debug = os.environ["DEBUG"]
     if debug:
@@ -41,8 +42,8 @@ def process_message(data):
     client = JiraClient(os.environ['JIRA_SERVER_URI'], os.environ['JIRA_USERNAME'], os.environ['JIRA_PASSWORD'])
 
     ids = idfinder.find_jira_ids()
-    for id in ids:
-        issue = client.lookup_jira_issue(id)
+    for jira_id in ids:
+        issue = client.lookup_jira_issue(jira_id)
 
         if issue is not None:
             response = JiraIssueFormatter(issue).format()
