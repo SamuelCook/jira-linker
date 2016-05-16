@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 
-import re
-import os
 import logging
+import os
+import re
 
 from jira import JIRA
 from jira import JIRAError
 
 outputs = []
 logger = logging.getLogger("jira-linker")
+debug = os.environ["DEBUG"]
+
+if debug:
+    logger.setLevel(logging.DEBUG)
 
 
 def process_message(data):
-    debug = os.environ["DEBUG"]
-    if debug:
-        logger.setLevel(logging.DEBUG)
-
     logger.debug("Received data:")
     logger.debug(data)
 
